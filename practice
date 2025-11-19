@@ -1,0 +1,2516 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mass-Mole Stoichiometry</title>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100%;
+      overflow-y: auto;
+    }
+   
+    * {
+      box-sizing: border-box;
+    }
+    html {
+      height: 100%;
+    }
+    .container {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 0;
+      min-height: 100%;
+      position: relative;
+    }
+    .container.drawing-mode {
+      overflow-y: auto;
+    }
+    .worksheet-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 12px 16px;
+      border-bottom: 3px solid #00d4ff;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .worksheet-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .worksheet-meta {
+      display: flex;
+      gap: 10px;
+      font-size: 10px;
+      color: #cbd5e0;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .content-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 16px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    h1 {
+      color: #ffffff;
+      text-align: center;
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 0 2px 10px rgba(0, 212, 255, 0.5);
+      letter-spacing: 0.5px;
+    }
+    .worksheet-subtitle {
+      color: #a0d2eb;
+      text-align: center;
+      font-size: 11px;
+      margin: 0;
+      font-weight: 300;
+    }
+    .problem-section {
+      background: #000000;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .problem-number {
+      display: inline-block;
+      background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+    }
+    .activity-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      justify-content: center;
+      padding: 8px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 8px;
+      border: 2px solid #00d4ff;
+    }
+    .activity-tab-btn {
+      background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      color: #cbd5e0;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-direction: column;
+    }
+    .activity-tab-btn:hover {
+      transform: translateY(-2px);
+      border-color: #00d4ff;
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+    }
+    .activity-tab-btn.active {
+      background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+      color: #ffffff;
+      border-color: #00d4ff;
+      box-shadow: 0 4px 16px rgba(0, 212, 255, 0.6);
+    }
+    .problem-selector {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      padding: 8px;
+      background: #f7fafc;
+      border-radius: 6px;
+      border: 2px solid #e2e8f0;
+    }
+    .problem-btn {
+      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+      color: #2d3748;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .problem-btn:hover {
+      transform: translateY(-2px);
+      border-color: #ff8c00;
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
+    }
+    .problem-btn.active {
+      background: linear-gradient(135deg, #ff8c00 0%, #ff6b00 100%);
+      color: #ffffff;
+      border-color: #ff8c00;
+      box-shadow: 0 4px 16px rgba(255, 140, 0, 0.5);
+    }
+    .problem-btn.completed {
+      background: #48bb78;
+      color: #ffffff;
+      border-color: #48bb78;
+      position: relative;
+    }
+    .problem-btn.completed::after {
+      content: '✓';
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ffffff;
+      color: #48bb78;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      border: 2px solid #48bb78;
+    }
+    .certificate-tab-btn {
+      background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      color: #a0aec0;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: not-allowed;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.5;
+    }
+    .certificate-tab-btn:not(:disabled) {
+      background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+      color: #000000;
+      cursor: pointer;
+      opacity: 1;
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+      animation: pulse 2s infinite;
+      font-size: 14px;
+    }
+    .certificate-tab-btn:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 215, 0, 0.8);
+    }
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+      }
+      50% {
+        box-shadow: 0 4px 20px rgba(255, 215, 0, 0.9);
+      }
+    }
+    .instructions {
+      background: #000000;
+      padding: 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border-left: 4px solid #00d4ff;
+      box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2);
+    }
+    .instructions-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #0066ff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .instructions p {
+      margin: 0;
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .equation-display {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 2px solid #fbbf24;
+      text-align: left;
+      box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3);
+    }
+    .equation-label {
+      font-size: 16px;
+      font-weight: bold;
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .equation {
+      font-size: 18px;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 6px;
+      font-family: 'Courier New', monospace;
+      background: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .problem {
+      font-size: 16px;
+      color: #ffffff;
+      margin-top: 6px;
+      line-height: 1.4;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+      text-align: center;
+    }
+    .workspace {
+      background: linear-gradient(135deg, #001a33 0%, #003366 100%);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 2px solid #00d4ff;
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4);
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .workspace-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dimensional-analysis {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 4px;
+      margin-bottom: 0;
+      overflow-x: auto;
+    }
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      border: 2px solid #cbd5e0;
+      border-radius: 4px;
+      background: #f7fafc;
+      min-width: 120px;
+      padding: 1px;
+    }
+    .fraction.correct {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+    .fraction.incorrect {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+    .fraction-part {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      min-height: 20px;
+      width: 100%;
+      justify-content: center;
+    }
+    .drop-zone {
+      min-height: 22px;
+      min-width: 50px;
+      border: 2px dashed #a0aec0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 4px;
+      background: #ffffff;
+      font-size: 11px;
+      color: #718096;
+      font-weight: 600;
+    }
+    .drop-zone.number {
+      min-width: 60px;
+    }
+    .drop-zone.unit {
+      min-width: 80px;
+    }
+    .drop-zone.drag-over {
+      background: #e6fffa;
+      border-color: #38b2ac;
+    }
+    .drop-zone.filled {
+      border-style: solid;
+      border-color: #00d4ff;
+      background: #001a33;
+      color: #00d4ff;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    .drop-zone.correct {
+      border-color: #00ff88;
+      background: #002211;
+      color: #00ff88;
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+    }
+    .drop-zone.incorrect {
+      border-color: #ff0066;
+      background: #330011;
+      color: #ff0066;
+      box-shadow: 0 0 15px rgba(255, 0, 102, 0.6);
+    }
+    .fraction-line {
+      width: 100%;
+      height: 1px;
+      background: #2d3748;
+      margin: 1px 0;
+    }
+    .operator {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2d3748;
+      margin: 0 3px;
+    }
+    .tile-bank {
+      background: linear-gradient(135deg, #1a0033 0%, #330066 100%);
+      padding: 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 2px solid #9933ff;
+      box-shadow: 0 8px 24px rgba(153, 51, 255, 0.4);
+    }
+    .tile-section {
+      margin-bottom: 0;
+    }
+    .tile-section:last-child {
+      margin-bottom: 0;
+    }
+    .tile-section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tiles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      justify-content: center;
+    }
+    .tile {
+      background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: move;
+      font-weight: 600;
+      font-size: 11px;
+      box-shadow: 0 2px 6px rgba(0, 212, 255, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+      user-select: none;
+    }
+    .tile.unit {
+      background: linear-gradient(135deg, #8b0000 0%, #dc143c 100%);
+      box-shadow: 0 4px 12px rgba(139, 0, 0, 0.5);
+    }
+    .tile:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.8);
+    }
+    .tile.unit:hover {
+      box-shadow: 0 6px 20px rgba(139, 0, 0, 0.8);
+    }
+    .tile.dragging {
+      opacity: 0.5;
+    }
+    .controls {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+      background: linear-gradient(135deg, #003d1a 0%, #006633 100%);
+      padding: 10px;
+      border-radius: 12px;
+      border: 2px solid #00ff88;
+      box-shadow: 0 8px 24px rgba(0, 255, 136, 0.4);
+      margin-bottom: 8px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+    .check-btn {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: #ffffff;
+    }
+    .check-btn:hover {
+      background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    }
+    .reset-btn {
+      background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+      color: #ffffff;
+    }
+    .reset-btn:hover {
+      background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4);
+    }
+    .feedback {
+      margin-top: 4px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      display: none;
+    }
+    .feedback.success {
+      background: #c6f6d5;
+      color: #22543d;
+      border: 2px solid #48bb78;
+    }
+    .feedback.error {
+      background: #fed7d7;
+      color: #742a2a;
+      border: 2px solid #f56565;
+    }
+    .feedback.show {
+      display: block;
+    }
+    .answer-section {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      border: 2px solid #cbd5e0;
+      border-radius: 4px;
+      background: #f7fafc;
+      padding: 1px;
+    }
+    .answer-section.correct {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+    .answer-section.incorrect {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+    .calc-toggle-btn {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      color: #ffffff;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 2px solid #48bb78;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .calc-toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      border-color: #38a169;
+    }
+    .calculator-modal {
+      position: fixed;
+      bottom: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none;
+      animation: slideUp 0.3s ease-out;
+    }
+    .calculator-modal.show {
+      display: block;
+    }
+    .periodic-table-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      display: none;
+      animation: slideUp 0.3s ease-out;
+      max-height: 90%;
+      max-width: 95%;
+    }
+    .periodic-table-modal.show {
+      display: block;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #f0f;
+      position: absolute;
+      animation: confetti-fall 3s linear forwards;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    .calculator-section {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      max-width: 200px;
+      margin: 0;
+      border: 2px solid #48bb78;
+      position: relative;
+    }
+    .calculator-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 8px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .calculator {
+      background: #1a202c;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid #4a5568;
+    }
+    .calc-display {
+      width: 100%;
+      background: #0d1117;
+      color: #48bb78;
+      border: 1px solid #48bb78;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: right;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-family: 'Courier New', monospace;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+    .calc-btn {
+      padding: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid #4a5568;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #4a5568;
+      color: #ffffff;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .calc-btn:hover {
+      background: #718096;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+    .calc-btn:active {
+      transform: scale(0.95);
+    }
+    .calc-operator {
+      background: #667eea;
+      border-color: #667eea;
+    }
+    .calc-operator:hover {
+      background: #764ba2;
+      border-color: #764ba2;
+    }
+    .calc-clear {
+      background: #f56565;
+      border-color: #f56565;
+    }
+    .calc-clear:hover {
+      background: #e53e3e;
+      border-color: #e53e3e;
+    }
+    .calc-equals {
+      background: #48bb78;
+      border-color: #48bb78;
+      grid-column: span 3;
+    }
+    .calc-equals:hover {
+      background: #38a169;
+      border-color: #38a169;
+    }
+    .calc-close-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #f56565;
+      color: #ffffff;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(255, 0, 102, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+    }
+    .calc-close-btn:hover {
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 4px 12px rgba(255, 0, 102, 0.8);
+      background: #e53e3e;
+    }
+    .periodic-table-section {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      max-width: 900px;
+      margin: 0 auto;
+      border: 2px solid #48bb78;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .periodic-table-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 12px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .periodic-search {
+      margin-bottom: 16px;
+    }
+    .element-search-input {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 2px solid #48bb78;
+      border-radius: 6px;
+      background: #1a202c;
+      color: #ffffff;
+      box-sizing: border-box;
+    }
+    .element-search-input:focus {
+      outline: none;
+      border-color: #00d4ff;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    .periodic-table-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+    .element-card {
+      background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      border: 2px solid #718096;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .element-card:hover {
+      transform: translateY(-3px);
+      border-color: #00d4ff;
+      box-shadow: 0 6px 16px rgba(0, 212, 255, 0.5);
+    }
+    .element-card.highlighted {
+      border-color: #ffd700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .element-number {
+      font-size: 10px;
+      color: #a0aec0;
+      font-weight: 600;
+    }
+    .element-symbol {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ffffff;
+      margin: 4px 0;
+      font-family: 'Arial', sans-serif;
+    }
+    .element-name {
+      font-size: 10px;
+      color: #cbd5e0;
+      margin-bottom: 4px;
+    }
+    .element-weight {
+      font-size: 11px;
+      color: #48bb78;
+      font-weight: bold;
+      padding: 3px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+    .starting-section {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      border: 2px solid #cbd5e0;
+      border-radius: 4px;
+      background: #f7fafc;
+      padding: 1px;
+    }
+    .starting-section.correct {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+    .starting-section.incorrect {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+    .name-input-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.5s;
+    }
+    .name-input-modal.show {
+      display: flex;
+    }
+    .name-input-box {
+      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 212, 255, 0.5);
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+    }
+    .name-input-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 16px;
+    }
+    .name-input-subtitle {
+      font-size: 16px;
+      color: #333333;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .name-input-field {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      border: 3px solid #00d4ff;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+      box-sizing: border-box;
+    }
+    .name-input-field:focus {
+      outline: none;
+      border-color: #0066ff;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+    .name-submit-btn {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: #ffffff;
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .name-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+    .name-submit-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .certificate-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.5s;
+    }
+    .certificate-modal.show {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    .certificate {
+      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+      border: 16px solid;
+      border-image: linear-gradient(45deg, #00d4ff, #ff00ff, #00ff88) 1;
+      padding: 40px;
+      max-width: 700px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 212, 255, 0.5);
+      position: relative;
+      animation: slideIn 0.5s;
+    }
+    @keyframes slideIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .certificate-header {
+      font-size: 40px;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+    .certificate-subheader {
+      font-size: 20px;
+      color: #333333;
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+    .certificate-body {
+      font-size: 17px;
+      color: #000000;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .certificate-name {
+      font-size: 30px;
+      font-weight: bold;
+      color: #0066ff;
+      margin: 20px 0;
+      padding: 16px;
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: 12px;
+    }
+    .certificate-achievement {
+      font-size: 18px;
+      color: #000000;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .certificate-score {
+      font-size: 26px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 24px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      border-radius: 12px;
+      border: 3px solid #ffd700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+    .certificate-date {
+      font-size: 15px;
+      color: #666666;
+      margin-top: 28px;
+    }
+    .certificate-instructions {
+      font-size: 15px;
+      color: #0066ff;
+      margin-top: 24px;
+      padding: 20px;
+      background: rgba(255, 215, 0, 0.15);
+      border-radius: 8px;
+      border: 3px solid #ffd700;
+      font-weight: 600;
+      line-height: 1.8;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+    .certificate-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #ff0066;
+      color: #ffffff;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(255, 0, 102, 0.5);
+    }
+    .certificate-close:hover {
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 4px 12px rgba(255, 0, 102, 0.8);
+    }
+    .certificate-stars {
+      font-size: 38px;
+      margin: 16px 0;
+    }
+    .drawing-canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: none;
+      z-index: 10001;
+      pointer-events: none;
+    }
+    .drawing-canvas-container.show {
+      display: block;
+    }
+    .canvas-wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    .canvas-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 10002;
+      pointer-events: auto;
+    }
+    .canvas-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #2d3748;
+    }
+    .canvas-close-btn {
+      background: #f56565;
+      color: #ffffff;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .canvas-close-btn:hover {
+      background: #e53e3e;
+      transform: rotate(90deg);
+    }
+    .canvas-controls {
+      position: fixed;
+      top: 52px;
+      left: 0;
+      right: 0;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 10002;
+      pointer-events: auto;
+    }
+    .color-picker-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .color-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid #cbd5e0;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .color-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    .color-btn.active {
+      border-color: #000000;
+      border-width: 3px;
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #000000;
+    }
+    .pen-size-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding-left: 10px;
+      border-left: 2px solid #cbd5e0;
+    }
+    .size-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    .size-btn {
+      background: #4a5568;
+      color: #ffffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 12px;
+    }
+    .size-btn:hover {
+      background: #2d3748;
+      transform: translateY(-2px);
+    }
+    .size-btn.active {
+      background: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+    .canvas-action-group {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .eraser-btn {
+      background: #718096;
+      color: #ffffff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .eraser-btn:hover {
+      background: #4a5568;
+      transform: translateY(-2px);
+    }
+    .eraser-btn.active {
+      background: #2d3748;
+      box-shadow: 0 0 0 3px rgba(45, 55, 72, 0.3);
+    }
+    .clear-canvas-btn {
+      background: #ed8936;
+      color: #ffffff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 12px;
+    }
+    .clear-canvas-btn:hover {
+      background: #dd6b20;
+      transform: translateY(-2px);
+    }
+    .drawing-canvas {
+      background: transparent;
+      cursor: crosshair;
+      touch-action: none;
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10001;
+      pointer-events: auto;
+    }
+    .drawing-canvas-container.show .container {
+      pointer-events: auto;
+      position: relative;
+      z-index: 10002;
+    }
+    .drawing-canvas-container.show .content-wrapper {
+      position: relative;
+      z-index: 10003;
+    }
+    .drawing-canvas-container.show .tile,
+    .drawing-canvas-container.show .drop-zone,
+    .drawing-canvas-container.show .problem-btn,
+    .drawing-canvas-container.show .check-btn,
+    .drawing-canvas-container.show .reset-btn {
+      pointer-events: auto;
+      position: relative;
+      z-index: 10003;
+    }
+    .pen-toggle-btn {
+      background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+      color: #ffffff;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 2px solid #ed8936;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pen-toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+    .pen-toggle-btn.active {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+    .mode-toggle-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .mode-toggle-btn:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      transform: translateY(-2px);
+    }
+    .mode-toggle-btn.selector-mode {
+      background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+    }
+    .drawing-canvas.selector-mode {
+      pointer-events: none;
+      cursor: default;
+    }
+  </style>
+ </head>
+ <body>
+  <div class="container">
+   <div class="worksheet-header">
+    <div class="header-content">
+     <div class="worksheet-info">
+      <div class="worksheet-meta">
+       <div class="meta-item"><span>📚</span> <span>Chemistry Worksheet</span>
+       </div>
+       <div class="meta-item"><span>⏱️</span> <span>Interactive Practice</span>
+       </div>
+       <div class="meta-item"><span>📊</span> <span id="progress-display">0/5 Complete</span>
+       </div>
+      </div>
+     </div>
+     <h1 id="main-title">Mass-Mole Stoichiometry Practice</h1>
+     <p class="worksheet-subtitle">Interactive Dimensional Analysis Worksheet</p>
+    </div>
+   </div>
+   <div class="content-wrapper">
+    <div class="instructions">
+     <div class="instructions-title"><span>📋 Instructions</span>
+     </div>
+     <p id="instructions-text">Drag numbers and units separately into the boxes. Convert between grams and moles using molar mass, then use the balanced equation to find the answer.</p>
+    </div>
+    <div class="activity-tabs"><button class="activity-tab-btn active" data-activity="mass-mole"> <span>⚖️→🧪</span> <span>Mass-Mole</span> </button> <button class="activity-tab-btn" data-activity="mole-mass"> <span>🧪→⚖️</span> <span>Mole-Mass</span> </button> <button class="activity-tab-btn" data-activity="mole-mole"> <span>🧪→🧪</span> <span>Mole-Mole</span> </button> <button class="activity-tab-btn" data-activity="mass-mass"> <span>⚖️→⚖️</span> <span>Mass-Mass</span> </button>
+    </div>
+    <div class="problem-selector"><button class="problem-btn active" data-problem="0">Problem 1</button> <button class="problem-btn" data-problem="1">Problem 2</button> <button class="problem-btn" data-problem="2">Problem 3</button> <button class="problem-btn" data-problem="3">Problem 4</button> <button class="problem-btn" data-problem="4">Problem 5</button> <button class="certificate-tab-btn" id="certificate-tab-btn" disabled> <span>🏆</span> <span>Certificate</span> </button> <button class="calc-toggle-btn" id="calc-toggle"> <span style="font-size: 18px;">🔢</span> <span>Calculator</span> </button> <button class="calc-toggle-btn" id="periodic-toggle"> <span style="font-size: 18px;">⚛️</span> <span>Periodic Table</span> </button> <button class="pen-toggle-btn" id="pen-toggle">✏️ Draw</button>
+    </div>
+    <div class="problem-section">
+     <div class="problem-number">
+      Problem <span id="current-problem-num">1</span>
+     </div>
+     <div class="equation-display">
+      <div class="equation-label">
+       Balanced Chemical Equation:
+      </div>
+      <div class="equation" id="equation-text">
+       2 H₂ + O₂ → 2 H₂O
+      </div>
+      <div class="problem" id="problem-text">
+       If you start with <strong>18 grams of H₂O</strong>, how many moles of O₂ were needed?
+      </div>
+     </div>
+    </div>
+    <div class="workspace">
+     <div class="workspace-title">
+      🔬 Dimensional Analysis Setup
+     </div>
+     <div class="dimensional-analysis" id="dimensional-analysis">
+      <div class="starting-section">
+       <div class="drop-zone number" data-position="start-number" data-correct="18"></div>
+       <div class="drop-zone unit" data-position="start-unit" data-correct="g H₂O"></div>
+      </div><span class="operator">×</span>
+      <div class="fraction" data-fraction="1">
+       <div class="fraction-part">
+        <div class="drop-zone number" data-position="f1-num-number" data-correct="1"></div>
+        <div class="drop-zone unit" data-position="f1-num-unit" data-correct="mol H₂O"></div>
+       </div>
+       <div class="fraction-line"></div>
+       <div class="fraction-part">
+        <div class="drop-zone number" data-position="f1-den-number" data-correct="18"></div>
+        <div class="drop-zone unit" data-position="f1-den-unit" data-correct="g H₂O"></div>
+       </div>
+      </div><span class="operator">×</span>
+      <div class="fraction" data-fraction="2">
+       <div class="fraction-part">
+        <div class="drop-zone number" data-position="f2-num-number" data-correct="1"></div>
+        <div class="drop-zone unit" data-position="f2-num-unit" data-correct="mol O₂"></div>
+       </div>
+       <div class="fraction-line"></div>
+       <div class="fraction-part">
+        <div class="drop-zone number" data-position="f2-den-number" data-correct="2"></div>
+        <div class="drop-zone unit" data-position="f2-den-unit" data-correct="mol H₂O"></div>
+       </div>
+      </div><span class="operator" id="third-operator" style="display: none;">×</span>
+      <div class="fraction" data-fraction="3" id="third-fraction" style="display: none;">
+       <div class="fraction-part">
+        <div class="drop-zone number" data-position="f3-num-number" data-correct=""></div>
+        <div class="drop-zone unit" data-position="f3-num-unit" data-correct=""></div>
+       </div>
+       <div class="fraction-line"></div>
+       <div class="fraction-part">
+        <div class="drop-zone number" data-position="f3-den-number" data-correct=""></div>
+        <div class="drop-zone unit" data-position="f3-den-unit" data-correct=""></div>
+       </div>
+      </div><span class="operator">=</span>
+      <div class="answer-section">
+       <div class="drop-zone number" data-position="ans-number" data-correct="0.5"></div>
+       <div class="drop-zone unit" data-position="ans-unit" data-correct="mol O₂"></div>
+      </div>
+     </div>
+    </div>
+    <div class="tile-bank">
+     <div class="tile-section">
+      <div class="tile-section-title">
+       🧩 Drag Numbers and Units:
+      </div>
+      <div class="tiles" style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+       <div style="display: flex; gap: 3px; align-items: center;">
+        <div class="tiles" id="number-tiles">
+         <div class="tile number" draggable="true" data-value="0.5" data-type="number">
+          0.5
+         </div>
+         <div class="tile number" draggable="true" data-value="1" data-type="number">
+          1
+         </div>
+         <div class="tile number" draggable="true" data-value="2" data-type="number">
+          2
+         </div>
+         <div class="tile number" draggable="true" data-value="18" data-type="number">
+          18
+         </div>
+        </div>
+       </div>
+       <div style="width: 2px; height: 32px; background: #cbd5e0;"></div>
+       <div style="display: flex; gap: 3px; align-items: center;">
+        <div class="tiles" id="unit-tiles">
+         <div class="tile unit" draggable="true" data-value="g H₂O" data-type="unit">
+          g H₂O
+         </div>
+         <div class="tile unit" draggable="true" data-value="mol H₂O" data-type="unit">
+          mol H₂O
+         </div>
+         <div class="tile unit" draggable="true" data-value="mol O₂" data-type="unit">
+          mol O₂
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="controls"><button class="check-btn" id="check-btn">Check Answer</button> <button class="reset-btn" id="reset-btn">Reset</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+   </div>
+   <div class="name-input-modal" id="name-input-modal">
+    <div class="name-input-box">
+     <div class="name-input-title">
+      🎉 Congratulations! 🎉
+     </div>
+     <div class="name-input-subtitle" id="name-input-subtitle">
+      You've completed all 5 stoichiometry problems!<br>
+       Enter your name to generate your certificate.
+     </div><input type="text" id="student-name-input" class="name-input-field" placeholder="Enter your name" maxlength="50"> <button class="name-submit-btn" id="name-submit-btn">Generate Certificate</button>
+    </div>
+   </div>
+   <div class="certificate-modal" id="certificate-modal">
+    <div class="certificate"><button class="certificate-close" id="certificate-close">×</button>
+     <div class="certificate-header">
+      Certificate
+     </div>
+     <div class="certificate-subheader">
+      of Achievement
+     </div>
+     <div class="certificate-stars">
+      ⭐ ⭐ ⭐ ⭐ ⭐
+     </div>
+     <div class="certificate-body">
+      This certifies that
+     </div>
+     <div class="certificate-name" id="certificate-student-name">
+      Stoichiometry Master
+     </div>
+     <div class="certificate-achievement">
+      Has successfully completed all 5 mass-mole<br>
+       stoichiometry problems with 100% accuracy
+     </div>
+     <div class="certificate-score" id="certificate-score">
+      Score: 5/5
+     </div>
+     <div class="certificate-body">
+      Demonstrating mastery of dimensional analysis,<br>
+       molar mass conversions, and chemical equations
+     </div>
+     <div class="certificate-date" id="certificate-date"></div>
+     <div class="certificate-instructions">
+      📸 To save this certificate, take a screenshot:<br>
+       🪟 Windows: Press Windows Key + Shift + S<br>
+       🍎 Mac: Press Command + Shift + 4<br>
+       📱 Mobile: Use your device's screenshot function
+     </div>
+    </div>
+   </div>
+   <div class="drawing-canvas-container" id="drawing-canvas-container">
+    <div class="canvas-wrapper">
+     <div class="canvas-header">
+      <div class="canvas-title">
+       Drawing Pad - Work out your calculations!
+      </div><button class="canvas-close-btn" id="canvas-close-btn">×</button>
+     </div>
+     <div class="canvas-controls"><button class="mode-toggle-btn" id="mode-toggle-btn"> <span>👆</span> <span id="mode-text">Switch to Selector Mode</span> </button>
+      <div class="color-picker-group"><button class="color-btn active" data-color="#000000" style="background: #000000;"></button> <button class="color-btn" data-color="#ff0000" style="background: #ff0000;"></button> <button class="color-btn" data-color="#0066ff" style="background: #0066ff;"></button> <button class="color-btn" data-color="#00cc66" style="background: #00cc66;"></button> <button class="color-btn" data-color="#ff00ff" style="background: #ff00ff;"></button> <button class="color-btn" data-color="#ffaa00" style="background: #ffaa00;"></button>
+      </div>
+      <div class="pen-size-group"><span class="size-label">Size:</span> <button class="size-btn" data-size="2">Thin</button> <button class="size-btn active" data-size="4">Medium</button> <button class="size-btn" data-size="8">Thick</button>
+      </div>
+      <div class="canvas-action-group"><button class="eraser-btn" id="eraser-btn"> <span>🧽</span> <span>Eraser</span> </button> <button class="clear-canvas-btn" id="clear-canvas-btn"> <span>🗑️</span> <span>Clear</span> </button>
+      </div>
+     </div>
+     <canvas id="drawing-canvas" class="drawing-canvas"></canvas>
+    </div>
+   </div>
+   <div class="calculator-modal" id="calculator-modal">
+    <div class="calculator-section"><button class="calc-close-btn" id="calc-close-btn">×</button>
+     <div class="calculator-title">
+      Calculator
+     </div>
+     <div class="calculator"><input type="text" id="calc-display" class="calc-display" readonly value="0">
+      <div class="calc-buttons"><button class="calc-btn" data-value="7">7</button> <button class="calc-btn" data-value="8">8</button> <button class="calc-btn" data-value="9">9</button> <button class="calc-btn calc-operator" data-value="/">÷</button> <button class="calc-btn" data-value="4">4</button> <button class="calc-btn" data-value="5">5</button> <button class="calc-btn" data-value="6">6</button> <button class="calc-btn calc-operator" data-value="*">×</button> <button class="calc-btn" data-value="1">1</button> <button class="calc-btn" data-value="2">2</button> <button class="calc-btn" data-value="3">3</button> <button class="calc-btn calc-operator" data-value="-">−</button> <button class="calc-btn" data-value="0">0</button> <button class="calc-btn" data-value=".">.</button> <button class="calc-btn calc-clear" data-value="C">C</button> <button class="calc-btn calc-operator" data-value="+">+</button> <button class="calc-btn calc-equals" data-value="=">=</button>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="periodic-table-modal" id="periodic-table-modal">
+    <div class="periodic-table-section"><button class="calc-close-btn" id="periodic-close-btn">×</button>
+     <div class="periodic-table-title">
+      Periodic Table - Atomic Weights
+     </div>
+     <div class="periodic-search"><input type="text" id="element-search" class="element-search-input" placeholder="Search element name or symbol...">
+     </div>
+     <div class="periodic-table-container" id="periodic-table-container"><!-- Elements will be rendered here -->
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#667eea",
+      surface_color: "#000000",
+      text_color: "#ffffff",
+      primary_action_color: "#48bb78",
+      secondary_action_color: "#f56565",
+      font_family: "Segoe UI",
+      font_size: 16,
+      main_title: "Mass-Mole Stoichiometry Practice",
+      instructions_text: "Drag numbers and units separately into the boxes. Convert between grams and moles using molar mass, then use the balanced equation to find the answer.",
+      check_button_text: "Check Answer",
+      reset_button_text: "Reset"
+    };
+    let config = {};
+    let draggedElement = null;
+    let dropZones = [];
+    let currentProblem = 0;
+    let completedProblems = new Set();
+    let currentActivity = 'mass-mole';
+    const moleMassProblems = [
+      {
+        equation: "2 H₂ + O₂ → 2 H₂O",
+        problem: "If you start with <strong>2 moles of H₂</strong>, how many grams of H₂O can be produced? (Molar mass H₂O = 18 g/mol)",
+        numbers: ["1", "2", "18", "36"],
+        units: ["mol H₂", "mol H₂O", "g H₂O"],
+        answers: {
+          startNumber: "2",
+          startUnit: "mol H₂",
+          f1NumNumber: "2",
+          f1NumUnit: "mol H₂O",
+          f1DenNumber: "2",
+          f1DenUnit: "mol H₂",
+          f2NumNumber: "18",
+          f2NumUnit: "g H₂O",
+          f2DenNumber: "1",
+          f2DenUnit: "mol H₂O",
+          ansNumber: "36",
+          ansUnit: "g H₂O"
+        }
+      },
+      {
+        equation: "N₂ + 3 H₂ → 2 NH₃",
+        problem: "If you have <strong>3 moles of N₂</strong>, how many grams of NH₃ can you produce? (Molar mass NH₃ = 17 g/mol)",
+        numbers: ["1", "2", "3", "17", "102"],
+        units: ["mol N₂", "mol NH₃", "g NH₃"],
+        answers: {
+          startNumber: "3",
+          startUnit: "mol N₂",
+          f1NumNumber: "2",
+          f1NumUnit: "mol NH₃",
+          f1DenNumber: "1",
+          f1DenUnit: "mol N₂",
+          f2NumNumber: "17",
+          f2NumUnit: "g NH₃",
+          f2DenNumber: "1",
+          f2DenUnit: "mol NH₃",
+          ansNumber: "102",
+          ansUnit: "g NH₃"
+        }
+      },
+      {
+        equation: "2 Mg + O₂ → 2 MgO",
+        problem: "If you start with <strong>0.5 moles of O₂</strong>, how many grams of MgO can you produce? (Molar mass MgO = 40 g/mol)",
+        numbers: ["0.5", "1", "2", "40"],
+        units: ["mol O₂", "mol MgO", "g MgO"],
+        answers: {
+          startNumber: "0.5",
+          startUnit: "mol O₂",
+          f1NumNumber: "2",
+          f1NumUnit: "mol MgO",
+          f1DenNumber: "1",
+          f1DenUnit: "mol O₂",
+          f2NumNumber: "40",
+          f2NumUnit: "g MgO",
+          f2DenNumber: "1",
+          f2DenUnit: "mol MgO",
+          ansNumber: "40",
+          ansUnit: "g MgO"
+        }
+      },
+      {
+        equation: "4 Fe + 3 O₂ → 2 Fe₂O₃",
+        problem: "If you have <strong>6 moles of Fe</strong>, how many grams of Fe₂O₃ are formed? (Molar mass Fe₂O₃ = 160 g/mol)",
+        numbers: ["2", "3", "4", "6", "160", "480"],
+        units: ["mol Fe", "mol Fe₂O₃", "g Fe₂O₃"],
+        answers: {
+          startNumber: "6",
+          startUnit: "mol Fe",
+          f1NumNumber: "2",
+          f1NumUnit: "mol Fe₂O₃",
+          f1DenNumber: "4",
+          f1DenUnit: "mol Fe",
+          f2NumNumber: "160",
+          f2NumUnit: "g Fe₂O₃",
+          f2DenNumber: "1",
+          f2DenUnit: "mol Fe₂O₃",
+          ansNumber: "480",
+          ansUnit: "g Fe₂O₃"
+        }
+      },
+      {
+        equation: "C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O",
+        problem: "If you burn <strong>5 moles of O₂</strong>, how many grams of H₂O are produced? (Molar mass H₂O = 18 g/mol)",
+        numbers: ["1", "4", "5", "18", "72"],
+        units: ["mol O₂", "mol H₂O", "g H₂O"],
+        answers: {
+          startNumber: "5",
+          startUnit: "mol O₂",
+          f1NumNumber: "4",
+          f1NumUnit: "mol H₂O",
+          f1DenNumber: "5",
+          f1DenUnit: "mol O₂",
+          f2NumNumber: "18",
+          f2NumUnit: "g H₂O",
+          f2DenNumber: "1",
+          f2DenUnit: "mol H₂O",
+          ansNumber: "72",
+          ansUnit: "g H₂O"
+        }
+      }
+    ];
+    const massMoleProblems = [
+      {
+        equation: "2 H₂ + O₂ → 2 H₂O",
+        problem: "If you start with <strong>18 grams of H₂O</strong>, how many moles of O₂ were needed?",
+        numbers: ["0.5", "1", "2", "18"],
+        units: ["g H₂O", "mol H₂O", "mol O₂"],
+        answers: {
+          startNumber: "18",
+          startUnit: "g H₂O",
+          f1NumNumber: "1",
+          f1NumUnit: "mol H₂O",
+          f1DenNumber: "18",
+          f1DenUnit: "g H₂O",
+          f2NumNumber: "1",
+          f2NumUnit: "mol O₂",
+          f2DenNumber: "2",
+          f2DenUnit: "mol H₂O",
+          ansNumber: "0.5",
+          ansUnit: "mol O₂"
+        }
+      },
+      {
+        equation: "N₂ + 3 H₂ → 2 NH₃",
+        problem: "If you have <strong>34 grams of NH₃</strong>, how many moles of H₂ were needed? (Molar mass NH₃ = 17 g/mol)",
+        numbers: ["1", "2", "3", "17", "34"],
+        units: ["g NH₃", "mol NH₃", "mol H₂"],
+        answers: {
+          startNumber: "34",
+          startUnit: "g NH₃",
+          f1NumNumber: "1",
+          f1NumUnit: "mol NH₃",
+          f1DenNumber: "17",
+          f1DenUnit: "g NH₃",
+          f2NumNumber: "3",
+          f2NumUnit: "mol H₂",
+          f2DenNumber: "2",
+          f2DenUnit: "mol NH₃",
+          ansNumber: "3",
+          ansUnit: "mol H₂"
+        }
+      },
+      {
+        equation: "2 Mg + O₂ → 2 MgO",
+        problem: "If you start with <strong>80 grams of MgO</strong>, how many moles of Mg were needed? (Molar mass MgO = 40 g/mol)",
+        numbers: ["1", "2", "40", "80"],
+        units: ["g MgO", "mol MgO", "mol Mg"],
+        answers: {
+          startNumber: "80",
+          startUnit: "g MgO",
+          f1NumNumber: "1",
+          f1NumUnit: "mol MgO",
+          f1DenNumber: "40",
+          f1DenUnit: "g MgO",
+          f2NumNumber: "2",
+          f2NumUnit: "mol Mg",
+          f2DenNumber: "2",
+          f2DenUnit: "mol MgO",
+          ansNumber: "2",
+          ansUnit: "mol Mg"
+        }
+      },
+      {
+        equation: "4 Fe + 3 O₂ → 2 Fe₂O₃",
+        problem: "If you have <strong>320 grams of Fe₂O₃</strong>, how many moles of O₂ were needed? (Molar mass Fe₂O₃ = 160 g/mol)",
+        numbers: ["2", "3", "4", "160", "320"],
+        units: ["g Fe₂O₃", "mol Fe₂O₃", "mol O₂"],
+        answers: {
+          startNumber: "320",
+          startUnit: "g Fe₂O₃",
+          f1NumNumber: "1",
+          f1NumUnit: "mol Fe₂O₃",
+          f1DenNumber: "160",
+          f1DenUnit: "g Fe₂O₃",
+          f2NumNumber: "3",
+          f2NumUnit: "mol O₂",
+          f2DenNumber: "2",
+          f2DenUnit: "mol Fe₂O₃",
+          ansNumber: "3",
+          ansUnit: "mol O₂"
+        }
+      },
+      {
+        equation: "C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O",
+        problem: "If you produce <strong>88 grams of CO₂</strong>, how many moles of O₂ were consumed? (Molar mass CO₂ = 44 g/mol)",
+        numbers: ["1", "3", "5", "44", "88"],
+        units: ["g CO₂", "mol CO₂", "mol O₂"],
+        answers: {
+          startNumber: "88",
+          startUnit: "g CO₂",
+          f1NumNumber: "1",
+          f1NumUnit: "mol CO₂",
+          f1DenNumber: "44",
+          f1DenUnit: "g CO₂",
+          f2NumNumber: "5",
+          f2NumUnit: "mol O₂",
+          f2DenNumber: "3",
+          f2DenUnit: "mol CO₂",
+          ansNumber: "10",
+          ansUnit: "mol O₂"
+        }
+      }
+    ];
+    const moleMoleProblems = [
+      {
+        equation: "2 H₂ + O₂ → 2 H₂O",
+        problem: "If you start with <strong>4 moles of H₂</strong>, how many moles of H₂O can be produced?",
+        numbers: ["2", "4"],
+        units: ["mol H₂", "mol H₂O"],
+        answers: {
+          startNumber: "4",
+          startUnit: "mol H₂",
+          f1NumNumber: "2",
+          f1NumUnit: "mol H₂O",
+          f1DenNumber: "2",
+          f1DenUnit: "mol H₂",
+          ansNumber: "4",
+          ansUnit: "mol H₂O"
+        }
+      },
+      {
+        equation: "N₂ + 3 H₂ → 2 NH₃",
+        problem: "If you have <strong>9 moles of H₂</strong>, how many moles of NH₃ can you produce?",
+        numbers: ["2", "3", "6", "9"],
+        units: ["mol H₂", "mol NH₃"],
+        answers: {
+          startNumber: "9",
+          startUnit: "mol H₂",
+          f1NumNumber: "2",
+          f1NumUnit: "mol NH₃",
+          f1DenNumber: "3",
+          f1DenUnit: "mol H₂",
+          ansNumber: "6",
+          ansUnit: "mol NH₃"
+        }
+      },
+      {
+        equation: "2 Mg + O₂ → 2 MgO",
+        problem: "If you start with <strong>3 moles of O₂</strong>, how many moles of MgO can you produce?",
+        numbers: ["2", "3", "6"],
+        units: ["mol O₂", "mol MgO"],
+        answers: {
+          startNumber: "3",
+          startUnit: "mol O₂",
+          f1NumNumber: "2",
+          f1NumUnit: "mol MgO",
+          f1DenNumber: "1",
+          f1DenUnit: "mol O₂",
+          ansNumber: "6",
+          ansUnit: "mol MgO"
+        }
+      },
+      {
+        equation: "4 Fe + 3 O₂ → 2 Fe₂O₃",
+        problem: "If you have <strong>6 moles of O₂</strong>, how many moles of Fe are needed?",
+        numbers: ["3", "4", "6", "8"],
+        units: ["mol O₂", "mol Fe"],
+        answers: {
+          startNumber: "6",
+          startUnit: "mol O₂",
+          f1NumNumber: "4",
+          f1NumUnit: "mol Fe",
+          f1DenNumber: "3",
+          f1DenUnit: "mol O₂",
+          ansNumber: "8",
+          ansUnit: "mol Fe"
+        }
+      },
+      {
+        equation: "C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O",
+        problem: "If you burn <strong>10 moles of O₂</strong>, how many moles of CO₂ are produced?",
+        numbers: ["3", "5", "6", "10"],
+        units: ["mol O₂", "mol CO₂"],
+        answers: {
+          startNumber: "10",
+          startUnit: "mol O₂",
+          f1NumNumber: "3",
+          f1NumUnit: "mol CO₂",
+          f1DenNumber: "5",
+          f1DenUnit: "mol O₂",
+          ansNumber: "6",
+          ansUnit: "mol CO₂"
+        }
+      }
+    ];
+    const massMassProblems = [
+      {
+        equation: "2 H₂ + O₂ → 2 H₂O",
+        problem: "If you start with <strong>4 grams of H₂</strong>, how many grams of H₂O can be produced? (Molar mass H₂ = 2 g/mol, H₂O = 18 g/mol)",
+        numbers: ["1", "2", "4", "18", "36"],
+        units: ["g H₂", "mol H₂", "mol H₂O", "g H₂O"],
+        answers: {
+          startNumber: "4",
+          startUnit: "g H₂",
+          f1NumNumber: "1",
+          f1NumUnit: "mol H₂",
+          f1DenNumber: "2",
+          f1DenUnit: "g H₂",
+          f2NumNumber: "2",
+          f2NumUnit: "mol H₂O",
+          f2DenNumber: "2",
+          f2DenUnit: "mol H₂",
+          f3NumNumber: "18",
+          f3NumUnit: "g H₂O",
+          f3DenNumber: "1",
+          f3DenUnit: "mol H₂O",
+          ansNumber: "36",
+          ansUnit: "g H₂O"
+        }
+      },
+      {
+        equation: "N₂ + 3 H₂ → 2 NH₃",
+        problem: "If you have <strong>28 grams of N₂</strong>, how many grams of NH₃ can you produce? (Molar mass N₂ = 28 g/mol, NH₃ = 17 g/mol)",
+        numbers: ["1", "2", "17", "28", "34"],
+        units: ["g N₂", "mol N₂", "mol NH₃", "g NH₃"],
+        answers: {
+          startNumber: "28",
+          startUnit: "g N₂",
+          f1NumNumber: "1",
+          f1NumUnit: "mol N₂",
+          f1DenNumber: "28",
+          f1DenUnit: "g N₂",
+          f2NumNumber: "2",
+          f2NumUnit: "mol NH₃",
+          f2DenNumber: "1",
+          f2DenUnit: "mol N₂",
+          f3NumNumber: "17",
+          f3NumUnit: "g NH₃",
+          f3DenNumber: "1",
+          f3DenUnit: "mol NH₃",
+          ansNumber: "34",
+          ansUnit: "g NH₃"
+        }
+      },
+      {
+        equation: "2 Mg + O₂ → 2 MgO",
+        problem: "If you burn <strong>48 grams of Mg</strong>, how many grams of MgO are produced? (Molar mass Mg = 24 g/mol, MgO = 40 g/mol)",
+        numbers: ["1", "2", "24", "40", "48", "80"],
+        units: ["g Mg", "mol Mg", "mol MgO", "g MgO"],
+        answers: {
+          startNumber: "48",
+          startUnit: "g Mg",
+          f1NumNumber: "1",
+          f1NumUnit: "mol Mg",
+          f1DenNumber: "24",
+          f1DenUnit: "g Mg",
+          f2NumNumber: "2",
+          f2NumUnit: "mol MgO",
+          f2DenNumber: "2",
+          f2DenUnit: "mol Mg",
+          f3NumNumber: "40",
+          f3NumUnit: "g MgO",
+          f3DenNumber: "1",
+          f3DenUnit: "mol MgO",
+          ansNumber: "80",
+          ansUnit: "g MgO"
+        }
+      },
+      {
+        equation: "4 Fe + 3 O₂ → 2 Fe₂O₃",
+        problem: "If you start with <strong>112 grams of Fe</strong>, how many grams of Fe₂O₃ are formed? (Molar mass Fe = 56 g/mol, Fe₂O₃ = 160 g/mol)",
+        numbers: ["1", "2", "4", "56", "112", "160"],
+        units: ["g Fe", "mol Fe", "mol Fe₂O₃", "g Fe₂O₃"],
+        answers: {
+          startNumber: "112",
+          startUnit: "g Fe",
+          f1NumNumber: "1",
+          f1NumUnit: "mol Fe",
+          f1DenNumber: "56",
+          f1DenUnit: "g Fe",
+          f2NumNumber: "2",
+          f2NumUnit: "mol Fe₂O₃",
+          f2DenNumber: "4",
+          f2DenUnit: "mol Fe",
+          f3NumNumber: "160",
+          f3NumUnit: "g Fe₂O₃",
+          f3DenNumber: "1",
+          f3DenUnit: "mol Fe₂O₃",
+          ansNumber: "160",
+          ansUnit: "g Fe₂O₃"
+        }
+      },
+      {
+        equation: "C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O",
+        problem: "If you burn <strong>44 grams of C₃H₈</strong>, how many grams of CO₂ are produced? (Molar mass C₃H₈ = 44 g/mol, CO₂ = 44 g/mol)",
+        numbers: ["1", "3", "44", "132"],
+        units: ["g C₃H₈", "mol C₃H₈", "mol CO₂", "g CO₂"],
+        answers: {
+          startNumber: "44",
+          startUnit: "g C₃H₈",
+          f1NumNumber: "1",
+          f1NumUnit: "mol C₃H₈",
+          f1DenNumber: "44",
+          f1DenUnit: "g C₃H₈",
+          f2NumNumber: "3",
+          f2NumUnit: "mol CO₂",
+          f2DenNumber: "1",
+          f2DenUnit: "mol C₃H₈",
+          f3NumNumber: "44",
+          f3NumUnit: "g CO₂",
+          f3DenNumber: "1",
+          f3DenUnit: "mol CO₂",
+          ansNumber: "132",
+          ansUnit: "g CO₂"
+        }
+      }
+    ];
+    let problems = massMoleProblems;
+    function initializeDropZones() {
+      dropZones = document.querySelectorAll('.drop-zone');
+     
+      dropZones.forEach(zone => {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('dragleave', handleDragLeave);
+        zone.addEventListener('drop', handleDrop);
+        zone.addEventListener('click', handleZoneClick);
+      });
+    }
+    function initializeTiles() {
+      const tiles = document.querySelectorAll('.tile');
+     
+      tiles.forEach(tile => {
+        tile.addEventListener('dragstart', handleDragStart);
+        tile.addEventListener('dragend', handleDragEnd);
+      });
+    }
+    function updateProgressDisplay() {
+      const progressDisplay = document.getElementById('progress-display');
+      progressDisplay.textContent = `${completedProblems.size}/5 Complete`;
+    }
+    function switchActivity(activity) {
+      currentActivity = activity;
+     
+      if (activity === 'mass-mole') {
+        problems = massMoleProblems;
+        document.getElementById('third-fraction').style.display = 'none';
+        document.getElementById('third-operator').style.display = 'none';
+      } else if (activity === 'mole-mass') {
+        problems = moleMassProblems;
+        document.getElementById('third-fraction').style.display = 'none';
+        document.getElementById('third-operator').style.display = 'none';
+      } else if (activity === 'mole-mole') {
+        problems = moleMoleProblems;
+        document.getElementById('third-fraction').style.display = 'none';
+        document.getElementById('third-operator').style.display = 'none';
+      } else {
+        problems = massMassProblems;
+        document.getElementById('third-fraction').style.display = 'flex';
+        document.getElementById('third-operator').style.display = 'inline';
+      }
+     
+      document.querySelectorAll('.activity-tab-btn').forEach(btn => {
+        if (btn.dataset.activity === activity) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+     
+      completedProblems.clear();
+      updateProgressDisplay();
+     
+      document.querySelectorAll('.problem-btn').forEach(btn => {
+        btn.classList.remove('completed');
+      });
+     
+      const certificateBtn = document.getElementById('certificate-tab-btn');
+      certificateBtn.disabled = true;
+     
+      loadProblem(0);
+    }
+    function loadProblem(index) {
+      currentProblem = index;
+      const problem = problems[index];
+     
+      document.getElementById('current-problem-num').textContent = index + 1;
+      document.getElementById('equation-text').textContent = problem.equation;
+      document.getElementById('problem-text').innerHTML = problem.problem;
+     
+      document.querySelectorAll('.problem-btn').forEach((btn, i) => {
+        if (i === index) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+     
+      const numberTilesContainer = document.getElementById('number-tiles');
+      const unitTilesContainer = document.getElementById('unit-tiles');
+     
+      numberTilesContainer.innerHTML = '';
+      unitTilesContainer.innerHTML = '';
+     
+      problem.numbers.forEach(num => {
+        const tile = document.createElement('div');
+        tile.className = 'tile number';
+        tile.draggable = true;
+        tile.dataset.value = num;
+        tile.dataset.type = 'number';
+        tile.textContent = num;
+        numberTilesContainer.appendChild(tile);
+      });
+     
+      problem.units.forEach(unit => {
+        const tile = document.createElement('div');
+        tile.className = 'tile unit';
+        tile.draggable = true;
+        tile.dataset.value = unit;
+        tile.dataset.type = 'unit';
+        tile.textContent = unit;
+        unitTilesContainer.appendChild(tile);
+      });
+     
+      document.querySelector('[data-position="start-number"]').dataset.correct = problem.answers.startNumber;
+      document.querySelector('[data-position="start-unit"]').dataset.correct = problem.answers.startUnit;
+      document.querySelector('[data-position="f1-num-number"]').dataset.correct = problem.answers.f1NumNumber;
+      document.querySelector('[data-position="f1-num-unit"]').dataset.correct = problem.answers.f1NumUnit;
+      document.querySelector('[data-position="f1-den-number"]').dataset.correct = problem.answers.f1DenNumber;
+      document.querySelector('[data-position="f1-den-unit"]').dataset.correct = problem.answers.f1DenUnit;
+      document.querySelector('[data-position="f2-num-number"]').dataset.correct = problem.answers.f2NumNumber;
+      document.querySelector('[data-position="f2-num-unit"]').dataset.correct = problem.answers.f2NumUnit;
+      document.querySelector('[data-position="f2-den-number"]').dataset.correct = problem.answers.f2DenNumber;
+      document.querySelector('[data-position="f2-den-unit"]').dataset.correct = problem.answers.f2DenUnit;
+     
+      if (currentActivity === 'mass-mass') {
+        document.querySelector('[data-position="f3-num-number"]').dataset.correct = problem.answers.f3NumNumber;
+        document.querySelector('[data-position="f3-num-unit"]').dataset.correct = problem.answers.f3NumUnit;
+        document.querySelector('[data-position="f3-den-number"]').dataset.correct = problem.answers.f3DenNumber;
+        document.querySelector('[data-position="f3-den-unit"]').dataset.correct = problem.answers.f3DenUnit;
+      }
+     
+      document.querySelector('[data-position="ans-number"]').dataset.correct = problem.answers.ansNumber;
+      document.querySelector('[data-position="ans-unit"]').dataset.correct = problem.answers.ansUnit;
+     
+      initializeTiles();
+      resetActivity();
+    }
+    function initializeProblemButtons() {
+      document.querySelectorAll('.problem-btn').forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+          loadProblem(index);
+        });
+      });
+    }
+    function handleDragStart(e) {
+      draggedElement = e.target;
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setData('text/html', e.target.innerHTML);
+    }
+    function handleDragEnd(e) {
+      e.target.classList.remove('dragging');
+    }
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+     
+      if (draggedElement) {
+        const dragType = draggedElement.dataset.type;
+        const zoneType = e.currentTarget.classList.contains('number') ? 'number' : 'unit';
+       
+        if (dragType === zoneType) {
+          e.currentTarget.classList.add('drag-over');
+        }
+      }
+     
+      e.dataTransfer.dropEffect = 'copy';
+      return false;
+    }
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+     
+      e.preventDefault();
+     
+      const zone = e.currentTarget;
+      zone.classList.remove('drag-over');
+     
+      if (!draggedElement) {
+        return false;
+      }
+     
+      const dragType = draggedElement.dataset.type;
+      const zoneType = zone.classList.contains('number') ? 'number' : 'unit';
+     
+      if (dragType !== zoneType) {
+        return false;
+      }
+     
+      const value = draggedElement.dataset.value;
+      zone.textContent = value;
+      zone.classList.add('filled');
+      zone.classList.remove('correct', 'incorrect');
+      zone.dataset.value = value;
+     
+      draggedElement = null;
+     
+      const feedback = document.getElementById('feedback');
+      feedback.classList.remove('show');
+     
+      const fractions = document.querySelectorAll('.fraction');
+      fractions.forEach(f => {
+        f.classList.remove('correct', 'incorrect');
+      });
+     
+      const answerSection = document.querySelector('.answer-section');
+      answerSection.classList.remove('correct', 'incorrect');
+     
+      const startingSection = document.querySelector('.starting-section');
+      startingSection.classList.remove('correct', 'incorrect');
+     
+      dropZones.forEach(z => {
+        z.classList.remove('correct', 'incorrect');
+      });
+     
+      return false;
+    }
+    function handleZoneClick(e) {
+      const zone = e.currentTarget;
+     
+      if (!zone.classList.contains('filled')) {
+        return;
+      }
+     
+      zone.textContent = '';
+      zone.classList.remove('filled', 'correct', 'incorrect');
+      delete zone.dataset.value;
+     
+      const feedback = document.getElementById('feedback');
+      feedback.classList.remove('show');
+     
+      const startingSection = document.querySelector('.starting-section');
+      const fractions = document.querySelectorAll('.fraction');
+      const answerSection = document.querySelector('.answer-section');
+     
+      startingSection.classList.remove('correct', 'incorrect');
+      fractions.forEach(f => {
+        f.classList.remove('correct', 'incorrect');
+      });
+      answerSection.classList.remove('correct', 'incorrect');
+     
+      dropZones.forEach(z => {
+        z.classList.remove('correct', 'incorrect');
+      });
+    }
+    function createConfetti() {
+      const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ffa07a', '#98d8c8', '#f7dc6f', '#bb8fce', '#85c1e2'];
+      const confettiCount = 100;
+     
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = '-10px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+       
+        document.body.appendChild(confetti);
+       
+        setTimeout(() => {
+          confetti.remove();
+        }, 3500);
+      }
+    }
+    function playSuccessSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioContext.currentTime;
+     
+      [523.25, 659.25, 783.99].forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+       
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+       
+        oscillator.frequency.value = freq;
+        oscillator.type = 'sine';
+       
+        gainNode.gain.setValueAtTime(0.3, now + index * 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + index * 0.1 + 0.5);
+       
+        oscillator.start(now + index * 0.1);
+        oscillator.stop(now + index * 0.1 + 0.5);
+      });
+    }
+    function checkAnswer() {
+      let allCorrect = true;
+      const feedback = document.getElementById('feedback');
+     
+      dropZones.forEach(zone => {
+        const correct = zone.dataset.correct;
+        const answer = zone.dataset.value;
+       
+        if (!answer) {
+          allCorrect = false;
+          return;
+        }
+       
+        if (answer === correct) {
+          zone.classList.add('correct');
+          zone.classList.remove('incorrect');
+        } else {
+          allCorrect = false;
+          zone.classList.add('incorrect');
+          zone.classList.remove('correct');
+        }
+      });
+     
+      const startingSection = document.querySelector('.starting-section');
+      const fractions = document.querySelectorAll('.fraction');
+      const answerSection = document.querySelector('.answer-section');
+     
+      const startNumZone = document.querySelector('[data-position="start-number"]');
+      const startUnitZone = document.querySelector('[data-position="start-unit"]');
+     
+      const startCorrect =
+        startNumZone.dataset.value === startNumZone.dataset.correct &&
+        startUnitZone.dataset.value === startUnitZone.dataset.correct;
+     
+      if (startCorrect) {
+        startingSection.classList.add('correct');
+        startingSection.classList.remove('incorrect');
+      } else {
+        startingSection.classList.add('incorrect');
+        startingSection.classList.remove('correct');
+      }
+     
+      fractions.forEach((fraction, index) => {
+        const fractionNum = index + 1;
+       
+        if (currentActivity === 'mass-mole' && fractionNum === 3) {
+          return;
+        }
+       
+        const numNumZone = document.querySelector(`[data-position="f${fractionNum}-num-number"]`);
+        const numUnitZone = document.querySelector(`[data-position="f${fractionNum}-num-unit"]`);
+        const denNumZone = document.querySelector(`[data-position="f${fractionNum}-den-number"]`);
+        const denUnitZone = document.querySelector(`[data-position="f${fractionNum}-den-unit"]`);
+       
+        const fractionCorrect =
+          numNumZone.dataset.value === numNumZone.dataset.correct &&
+          numUnitZone.dataset.value === numUnitZone.dataset.correct &&
+          denNumZone.dataset.value === denNumZone.dataset.correct &&
+          denUnitZone.dataset.value === denUnitZone.dataset.correct;
+       
+        if (fractionCorrect) {
+          fraction.classList.add('correct');
+          fraction.classList.remove('incorrect');
+        } else {
+          fraction.classList.add('incorrect');
+          fraction.classList.remove('correct');
+        }
+      });
+     
+      const ansNumZone = document.querySelector('[data-position="ans-number"]');
+      const ansUnitZone = document.querySelector('[data-position="ans-unit"]');
+     
+      const answerCorrect =
+        ansNumZone.dataset.value === ansNumZone.dataset.correct &&
+        ansUnitZone.dataset.value === ansUnitZone.dataset.correct;
+     
+      if (answerCorrect) {
+        answerSection.classList.add('correct');
+        answerSection.classList.remove('incorrect');
+      } else {
+        answerSection.classList.add('incorrect');
+        answerSection.classList.remove('correct');
+      }
+     
+      if (allCorrect) {
+        completedProblems.add(currentProblem);
+       
+        const currentBtn = document.querySelector(`[data-problem="${currentProblem}"]`);
+        currentBtn.classList.add('completed');
+       
+        updateProgressDisplay();
+       
+        feedback.textContent = '🎉 Perfect! You correctly converted between mass and moles using dimensional analysis!';
+        feedback.className = 'feedback success show';
+       
+        createConfetti();
+        playSuccessSound();
+       
+        if (completedProblems.size === problems.length) {
+          const certificateBtn = document.getElementById('certificate-tab-btn');
+          certificateBtn.disabled = false;
+         
+          setTimeout(() => {
+            showNameInput();
+          }, 2000);
+        }
+      } else {
+        feedback.textContent = '❌ Not quite right. Check your conversion factors, molar masses, and make sure units cancel properly!';
+        feedback.className = 'feedback error show';
+      }
+    }
+    function showNameInput() {
+      const nameModal = document.getElementById('name-input-modal');
+      const subtitle = document.getElementById('name-input-subtitle');
+     
+      let activityTitle = '';
+      if (currentActivity === 'mass-mole') {
+        activityTitle = 'mass-mole';
+      } else if (currentActivity === 'mole-mass') {
+        activityTitle = 'mole-mass';
+      } else if (currentActivity === 'mole-mole') {
+        activityTitle = 'mole-mole';
+      } else {
+        activityTitle = 'mass-mass';
+      }
+     
+      subtitle.innerHTML = `You've completed all 5 ${activityTitle} stoichiometry problems!<br>Enter your name to generate your certificate.`;
+      nameModal.classList.add('show');
+     
+      const nameInput = document.getElementById('student-name-input');
+      setTimeout(() => nameInput.focus(), 100);
+    }
+    function showCertificate(studentName) {
+      const nameModal = document.getElementById('name-input-modal');
+      nameModal.classList.remove('show');
+     
+      const modal = document.getElementById('certificate-modal');
+      const dateElement = document.getElementById('certificate-date');
+      const nameElement = document.getElementById('certificate-student-name');
+      const scoreElement = document.getElementById('certificate-score');
+      const achievementElement = document.querySelector('.certificate-achievement');
+     
+      const now = new Date();
+      const dateString = now.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+     
+      let activityTitle = '';
+      if (currentActivity === 'mass-mole') {
+        activityTitle = 'mass-mole';
+      } else if (currentActivity === 'mole-mass') {
+        activityTitle = 'mole-mass';
+      } else if (currentActivity === 'mole-mole') {
+        activityTitle = 'mole-mole';
+      } else {
+        activityTitle = 'mass-mass';
+      }
+     
+      nameElement.textContent = studentName || 'Stoichiometry Master';
+      dateElement.textContent = `Completed on ${dateString}`;
+      scoreElement.textContent = `Score: ${completedProblems.size}/5`;
+      achievementElement.innerHTML = `Has successfully completed all 5 ${activityTitle}<br>stoichiometry problems with 100% accuracy`;
+      modal.classList.add('show');
+     
+      createConfetti();
+      playSuccessSound();
+    }
+    function openCertificateFromTab() {
+      const nameInput = document.getElementById('student-name-input');
+      const storedName = nameInput.value.trim();
+     
+      if (storedName) {
+        showCertificate(storedName);
+      } else {
+        showNameInput();
+      }
+    }
+    function closeCertificate() {
+      const modal = document.getElementById('certificate-modal');
+      modal.classList.remove('show');
+    }
+    function resetActivity() {
+      dropZones.forEach(zone => {
+        zone.textContent = '';
+        zone.classList.remove('filled', 'correct', 'incorrect');
+        delete zone.dataset.value;
+      });
+     
+      const startingSection = document.querySelector('.starting-section');
+      const fractions = document.querySelectorAll('.fraction');
+      const answerSection = document.querySelector('.answer-section');
+     
+      startingSection.classList.remove('correct', 'incorrect');
+      fractions.forEach(f => {
+        f.classList.remove('correct', 'incorrect');
+      });
+      answerSection.classList.remove('correct', 'incorrect');
+     
+      const feedback = document.getElementById('feedback');
+      feedback.classList.remove('show');
+    }
+    async function onConfigChange(newConfig) {
+      const customFont = newConfig.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Tahoma, Geneva, Verdana, sans-serif';
+      const baseSize = newConfig.font_size || defaultConfig.font_size;
+     
+      const bgColor = newConfig.background_color || defaultConfig.background_color;
+      const surfaceColor = newConfig.surface_color || defaultConfig.surface_color;
+      const textColor = newConfig.text_color || defaultConfig.text_color;
+      const primaryColor = newConfig.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = newConfig.secondary_action_color || defaultConfig.secondary_action_color;
+     
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+     
+      document.querySelector('.container').style.background = `linear-gradient(135deg, ${bgColor} 0%, #764ba2 100%)`;
+     
+      const surfaces = document.querySelectorAll('.instructions, .equation-display, .workspace, .tile-bank');
+      surfaces.forEach(surface => {
+        surface.style.background = surfaceColor;
+        surface.style.color = textColor;
+      });
+      const problemSection = document.querySelector('.problem-section');
+      if (problemSection) {
+        problemSection.style.background = surfaceColor;
+      }
+     
+      document.getElementById('main-title').textContent = newConfig.main_title || defaultConfig.main_title;
+      document.getElementById('main-title').style.fontSize = `${baseSize * 1.25}px`;
+      document.getElementById('main-title').style.fontFamily = `${customFont}, ${baseFontStack}`;
+     
+      document.getElementById('instructions-text').textContent = newConfig.instructions_text || defaultConfig.instructions_text;
+      document.getElementById('instructions-text').style.fontSize = `${baseSize * 0.875}px`;
+      document.getElementById('instructions-text').style.color = textColor;
+     
+      document.getElementById('check-btn').textContent = newConfig.check_button_text || defaultConfig.check_button_text;
+      document.getElementById('check-btn').style.background = primaryColor;
+      document.getElementById('check-btn').style.fontSize = `${baseSize * 0.8125}px`;
+     
+      document.getElementById('reset-btn').textContent = newConfig.reset_button_text || defaultConfig.reset_button_text;
+      document.getElementById('reset-btn').style.background = secondaryColor;
+      document.getElementById('reset-btn').style.fontSize = `${baseSize * 0.8125}px`;
+     
+      document.querySelector('.equation').style.fontSize = `${baseSize * 1.125}px`;
+      document.querySelector('.problem').style.fontSize = `${baseSize}px`;
+      document.querySelector('.workspace-title').style.fontSize = `${baseSize * 0.9375}px`;
+     
+      const tileSectionTitles = document.querySelectorAll('.tile-section-title');
+      tileSectionTitles.forEach(title => {
+        title.style.fontSize = `${baseSize * 0.875}px`;
+      });
+    }
+    let calcCurrentValue = '0';
+    let calcPreviousValue = '';
+    let calcOperation = null;
+    const elements = [
+      { number: 1, symbol: 'H', name: 'Hydrogen', weight: '1.008' },
+      { number: 2, symbol: 'He', name: 'Helium', weight: '4.003' },
+      { number: 3, symbol: 'Li', name: 'Lithium', weight: '6.941' },
+      { number: 4, symbol: 'Be', name: 'Beryllium', weight: '9.012' },
+      { number: 5, symbol: 'B', name: 'Boron', weight: '10.81' },
+      { number: 6, symbol: 'C', name: 'Carbon', weight: '12.01' },
+      { number: 7, symbol: 'N', name: 'Nitrogen', weight: '14.01' },
+      { number: 8, symbol: 'O', name: 'Oxygen', weight: '16.00' },
+      { number: 9, symbol: 'F', name: 'Fluorine', weight: '19.00' },
+      { number: 10, symbol: 'Ne', name: 'Neon', weight: '20.18' },
+      { number: 11, symbol: 'Na', name: 'Sodium', weight: '22.99' },
+      { number: 12, symbol: 'Mg', name: 'Magnesium', weight: '24.31' },
+      { number: 13, symbol: 'Al', name: 'Aluminum', weight: '26.98' },
+      { number: 14, symbol: 'Si', name: 'Silicon', weight: '28.09' },
+      { number: 15, symbol: 'P', name: 'Phosphorus', weight: '30.97' },
+      { number: 16, symbol: 'S', name: 'Sulfur', weight: '32.07' },
+      { number: 17, symbol: 'Cl', name: 'Chlorine', weight: '35.45' },
+      { number: 18, symbol: 'Ar', name: 'Argon', weight: '39.95' },
+      { number: 19, symbol: 'K', name: 'Potassium', weight: '39.10' },
+      { number: 20, symbol: 'Ca', name: 'Calcium', weight: '40.08' },
+      { number: 21, symbol: 'Sc', name: 'Scandium', weight: '44.96' },
+      { number: 22, symbol: 'Ti', name: 'Titanium', weight: '47.87' },
+      { number: 23, symbol: 'V', name: 'Vanadium', weight: '50.94' },
+      { number: 24, symbol: 'Cr', name: 'Chromium', weight: '52.00' },
+      { number
